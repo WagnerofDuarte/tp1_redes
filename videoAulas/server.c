@@ -4,11 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
 
 #define BUFSZ 1024
+
+GameMessage msg;
 
 void usage(int argc, char **argv) {
     printf("usage: %s <v4|v6> <server port>\n", argv[0]);
@@ -48,7 +51,12 @@ int main(int argc, char **argv) {
 
     char addrstr[BUFSZ];
     addrtostr(addr, addrstr, BUFSZ);
-    printf("bound to %s, waiting connections\n", addrstr);
+
+    if (strcmp(argv[1], "v4") == 0) {
+        printf("Servidor iniciado em modo IPv4 na porta %s. Aguardando conexão...\n", argv[2]);
+    } else {
+        printf("Servidor iniciado em modo IPv6 na porta %s. Aguardando conexão...\n", argv[2]);
+    }
 
     while (1) {
         struct sockaddr_storage cstorage;
@@ -59,6 +67,35 @@ int main(int argc, char **argv) {
         if (csock == -1) {
             logexit("accept");
         }
+        printf("Cliente conectado.\n");
+
+        msg.type = MSG_REQUEST;
+        strcpy(msg.message,
+            "Escolha sua jogada:\n"
+            "0 - Nuclear Attack\n"
+            "1 - Intercept Attack\n"
+            "2 - Cyber Attack\n"
+            "3 - Drone Strike\n"
+            "4 - Bio Attack\n"
+        );
+        send(csock, &msg, sizeof(msg), 0);
+        printf("Apresentando as opções para o cliente.");
+
+        /* Receber escolha do cliente */
+        recv(csock, &msg, sizeof(msg), 0);
+        if (msg.type != MSG_RESPONSE) {
+            // Erro ou protocolo quebrado
+            logexit("Tipo de mensagem inesperado");
+        }
+        /* Printar escolha do cliente "Cliente escolheu X." */
+
+        /* Escolha aleatória do servidor */
+        /* Printar a escolha aleatória do servidor */
+
+        /* Chamar regras do jogo pra decidir vencedor */
+        /* Atualizar placar e printar na tela o placar --> "Placar atualizado: Cliente A x B Servidor "*/
+
+        /* Enviar pro cliente a escolha do servidor e o resultado da jogada */
 
         char caddrstr[BUFSZ];
         addrtostr(caddr, caddrstr, BUFSZ);

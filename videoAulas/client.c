@@ -9,6 +9,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+GameMessage msg;
+
 void usage(int argc, char **argv) {
 	printf("usage: %s <server IP> <server port>\n", argv[0]);
 	printf("example: %s 127.0.0.1 51511\n", argv[0]);
@@ -36,11 +38,30 @@ int main(int argc, char **argv) {
 	if (0 != connect(s, addr, sizeof(storage))) {
 		logexit("connect");
 	}
+	printf("Conectado ao servidor.\n");
 
-	char addrstr[BUFSZ];
-	addrtostr(addr, addrstr, BUFSZ);
+	// char addrstr[BUFSZ];
+	// addrtostr(addr, addrstr, BUFSZ);
 
-	printf("connected to %s\n", addrstr);
+	// TODO: Criar função que lida com todos os tipos de mensagem
+	/* Recebe a mensagem de escolher a jogada e mostra na tela */
+	recv(s, &msg, sizeof(msg), 0);
+	if (msg.type == MSG_REQUEST) {
+		printf("%s", msg.message);
+	}
+
+	/* Cliente deve escolher um ataque*/
+	int usersChoice;
+	scanf("%d", &usersChoice);
+	/* Printar o ataque escolhido */
+	// Criar função que printa isso
+
+	/* Enviar pro servidor a escolha */
+	send(s, &msg, sizeof(msg), 0);
+
+	/* Receber escolha do servidor + resultado da partida */
+	recv(s, &msg, sizeof(msg), 0);
+	/* Printar escolha do server e resultado da partida*/
 
 	char buf[BUFSZ];
 	memset(buf, 0, BUFSZ);

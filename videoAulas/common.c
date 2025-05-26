@@ -98,3 +98,40 @@ int server_sockaddr_init(const char *proto, const char *portstr,
         return -1;
     }
 }
+
+int jokenBoomLogic(int userChoice, int serverChoice) {
+
+    if (userChoice == serverChoice) {
+        return -1; // Empate
+    }
+
+    switch (userChoice) {
+        case 0: // Nuclear
+            if (serverChoice == 2 || serverChoice == 3){
+                return 1;
+            }
+            return 0;
+        case 1: // Intercept
+            if (serverChoice == 0 || serverChoice == 4){
+                return 1;
+            }
+            return 0;
+        case 2: // Cyber
+            if (serverChoice == 1 || serverChoice == 3){
+                return 1;
+            }
+            return 0;
+        case 3: // Drone
+            if (serverChoice == 1 || serverChoice == 4){
+                return 1;
+            }
+            return 0;
+        case 4: // Bio
+            if (serverChoice == 0 || serverChoice == 2){
+                return 1;
+            }
+            return 0;
+        default:
+            break;
+    }
+}
