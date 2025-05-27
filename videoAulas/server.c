@@ -97,6 +97,16 @@ int main(int argc, char **argv) {
 
         /* Enviar pro cliente a escolha do servidor e o resultado da jogada */
 
+        /* Enviar pro cliente a mesnagem pra jogar novamente */
+        msg.type = MSG_PLAY_AGAIN_REQUEST;
+        strcpy(msg.message,
+            "Deseja jogar novamente?\n"
+            "1 - Sim\n"
+            "0 - Não\n"
+        );
+
+        send(csock, &msg, sizeof(msg), 0);
+
         char caddrstr[BUFSZ];
         addrtostr(caddr, caddrstr, BUFSZ);
         printf("[log] connection from %s\n", caddrstr);

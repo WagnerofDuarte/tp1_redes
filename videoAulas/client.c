@@ -61,7 +61,9 @@ int main(int argc, char **argv) {
 
 	/* Receber escolha do servidor + resultado da partida */
 	recv(s, &msg, sizeof(msg), 0);
-	/* Printar escolha do server e resultado da partida*/
+	/* Printar escolha do server e resultado da partida */
+
+	
 
 	char buf[BUFSZ];
 	memset(buf, 0, BUFSZ);
