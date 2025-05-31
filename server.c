@@ -9,7 +9,7 @@ void recieveMsgAsServer() {
     MessageType nextMsgType = MSG_ERROR;
     recv(csock, &msg, sizeof(msg), 0);
     if(msg.type == MSG_RESPONSE) {
-        printf("Cliente escolheu %d\n", msg.client_action);
+        printf("\nCliente escolheu %d\n", msg.client_action);
         if(checkForErrors()) {
             sendMsgAsServer(nextMsgType);
             return;
@@ -42,7 +42,7 @@ void sendMsgAsServer(MessageType type) {
     switch(type) {
         case MSG_REQUEST:
 			strcpy(msg.message,
-                "Escolha sua jogada:\n"
+                "\nEscolha sua jogada:\n"
                 "0 - Nuclear Attack\n"
                 "1 - Intercept Attack\n"
                 "2 - Cyber Attack\n"
@@ -53,14 +53,14 @@ void sendMsgAsServer(MessageType type) {
 			break;
 		case MSG_RESULT:
 			snprintf(msg.message, MSG_SIZE,
-                "Você escolheu: %s\n"
+                "\nVocê escolheu: %s\n"
                 "Servidor escolheu: %s\n"
                 "Resultado: %s!\n",
                 getMoveName(msg.client_action), getMoveName(msg.server_action), getResultName(msg.result));
 			break;
 		case MSG_PLAY_AGAIN_REQUEST:
 			strcpy(msg.message,
-                "Deseja jogar novamente?\n"
+                "\nDeseja jogar novamente?\n"
                 "1 - Sim\n"
                 "0 - Não\n"
             );
@@ -129,7 +129,7 @@ int checkForErrors() {
     switch (msg.type) {
         case MSG_RESPONSE:
             if (msg.client_action < 0 || msg.client_action > 4) {
-                printf("Erro: opção inválida de jogada.\n");
+                printf("\nErro: opção inválida de jogada.\n");
                 strcpy(msg.message, "Por favor, selecione um valor de 0 a 4.\n");
                 errorFlag = 0;
                 return 1;
@@ -137,7 +137,7 @@ int checkForErrors() {
             return 0;
         case MSG_PLAY_AGAIN_RESPONSE:
             if (msg.client_action < 0 || msg.client_action > 1) {
-                printf("Erro: resposta inválida para jogar novamente.\n");
+                printf("\nErro: resposta inválida para jogar novamente.\n");
                 strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.\n");
                 errorFlag = 1;
                 return 1;
