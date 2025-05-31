@@ -16,6 +16,16 @@ GameMessage msg;
 int csock;
 int startNewConection = 1;
 
+void resetMsg() {
+    msg.type = 0;
+    msg.client_action = -1;
+    msg.server_action = -1;
+    msg.result = -1;
+    msg.client_wins = 0;
+    msg.server_wins = 0;
+    memset(msg.message, 0, MSG_SIZE);
+}
+
 void printReplayChoice(int choice) {
     switch (choice) {
         case 0:
@@ -162,6 +172,8 @@ int main(int argc, char **argv) {
     while (1) {
         
         if(startNewConection) {
+
+            resetMsg(); // Reseta a mensagem para o próximo jogo
             struct sockaddr_storage cstorage;
             struct sockaddr *caddr = (struct sockaddr *)(&cstorage);
             socklen_t caddrlen = sizeof(cstorage);
