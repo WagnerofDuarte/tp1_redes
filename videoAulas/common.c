@@ -134,7 +134,7 @@ int jokenBoomLogic(int userChoice, int serverChoice) {
             }
             return 0;
         default:
-            break;
+            return -2; // Jogada inválida
     }
 }
 

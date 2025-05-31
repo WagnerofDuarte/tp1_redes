@@ -55,7 +55,7 @@ void recieveClientMsgResponse() {
     }
 }
 
-int makeServerPlay() {
+void makeServerPlay() {
     srand(time(NULL)); // Inicializa a semente do gerador (só uma vez no programa)
     msg.server_action = rand() % 5;
     printf("Servidor escolheu aleatoriamente %d.", msg.server_action);

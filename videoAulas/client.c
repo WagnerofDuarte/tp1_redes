@@ -38,6 +38,8 @@ const char* getResultName(int move) {
             return "Vitória";
         case -1: // Tentar remover esse
             return "Empate";
+		default:
+			return "Resultado inválido";
     }
 }
 
