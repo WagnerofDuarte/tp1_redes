@@ -102,6 +102,8 @@ void sendMsgAsServer(MessageType type) {
     send(csock, &msg, sizeof(msg), 0);
     if(type == MSG_REQUEST || type == MSG_PLAY_AGAIN_REQUEST) {
         recieveMsgAsServer();
+    } else if (type == MSG_ERROR) {
+        sendMsgAsServer(MSG_REQUEST);
     } else if (type == MSG_END) {
         endGame();
     }
