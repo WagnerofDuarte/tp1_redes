@@ -55,8 +55,8 @@ void recieveRequestMsg() {
 void sendPlayChoseResponse() {
 	int usersChoice;
 	scanf("%d", &usersChoice);
-
 	msg.type = MSG_RESPONSE;
+	msg.client_action = usersChoice;
 	send(s, &msg, sizeof(msg), 0); 
 	printf("Você escolheu: %s\n", getMoveName(usersChoice));
 }
@@ -84,6 +84,7 @@ int sendPlayAgainResponse() {
 	int usersChoice;
 	scanf("%d", &usersChoice);
 	msg.type = MSG_PLAY_AGAIN_RESPONSE;
+	msg.client_action = usersChoice;
 	send(s, &msg, sizeof(msg), 0);
 	return usersChoice; 
 }
