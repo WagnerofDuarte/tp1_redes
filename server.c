@@ -49,7 +49,7 @@ void sendMsgAsServer(MessageType type) {
                 "3 - Drone Strike\n"
                 "4 - Bio Attack\n"
             );
-            printf("Apresentando as opções para o cliente.\n");
+            printf("\nApresentando as opções para o cliente.\n");
 			break;
 		case MSG_RESULT:
 			snprintf(msg.message, MSG_SIZE,
@@ -64,7 +64,7 @@ void sendMsgAsServer(MessageType type) {
                 "1 - Sim\n"
                 "0 - Não\n"
             );
-            printf("Perguntando se o cliente deseja jogar novamente.\n");
+            printf("\nPerguntando se o cliente deseja jogar novamente.\n");
 			break;
 		case MSG_END:
 			snprintf(msg.message, MSG_SIZE,
@@ -238,9 +238,9 @@ int main(int argc, char **argv) {
     addrtostr(addr, addrstr, BUFSZ);
 
     if (strcmp(argv[1], "v4") == 0) {
-        printf("Servidor iniciado em modo IPv4 na porta %s. Aguardando conexão...\n", argv[2]);
+        printf("\nServidor iniciado em modo IPv4 na porta %s. Aguardando conexão...\n", argv[2]);
     } else {
-        printf("Servidor iniciado em modo IPv6 na porta %s. Aguardando conexão...\n", argv[2]);
+        printf("\nServidor iniciado em modo IPv6 na porta %s. Aguardando conexão...\n", argv[2]);
     }
 
     while (1) {
@@ -252,7 +252,7 @@ int main(int argc, char **argv) {
         if (csock == -1) {
             logexit("accept");
         }
-        printf("Cliente conectado.\n");
+        printf("\nCliente conectado.\n");
 
         sendMsgAsServer(MSG_REQUEST);
     }
