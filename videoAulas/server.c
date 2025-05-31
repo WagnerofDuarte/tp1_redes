@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -12,6 +13,105 @@
 #define BUFSZ 1024
 
 GameMessage msg;
+int csock;
+int startNewConection = 1;
+
+void printReplayChoice(int choice) {
+    switch (choice) {
+        case 0:
+            printf("Cliente não deseja jogar novamente.");
+            break;
+        case 1: 
+            printf("Cliente deseja jogar novamente.");
+            break;
+        default:
+            // ERRO
+            break;
+    }
+}
+
+void sendRequestMsg() {
+    msg.type = MSG_REQUEST;
+    strcpy(msg.message,
+        "Escolha sua jogada:\n"
+        "0 - Nuclear Attack\n"
+        "1 - Intercept Attack\n"
+        "2 - Cyber Attack\n"
+        "3 - Drone Strike\n"
+        "4 - Bio Attack\n"
+    );
+
+    send(csock, &msg, sizeof(msg), 0);
+    printf("Apresentando as opções para o cliente.");
+}
+
+void recieveClientMsgResponse() {
+    recv(csock, &msg, sizeof(msg), 0); // Recebe a jogada do cliente
+    if (msg.type == MSG_RESPONSE) {
+        printf("Cliente escolheu %d", msg.client_action);
+    } else {
+        // Erro ou protocolo quebrado
+        logexit("Tipo de mensagem inesperado");
+    }
+}
+
+int makeServerPlay() {
+    srand(time(NULL)); // Inicializa a semente do gerador (só uma vez no programa)
+    msg.server_action = rand() % 5;
+    printf("Servidor escolheu aleatoriamente %d.", msg.server_action);
+
+    int result = jokenBoomLogic(msg.client_action, msg.server_action);
+    msg.result = result;
+    switch (result) {
+        case 1:
+            msg.client_wins++;
+            break;
+        case 0:
+            msg.server_wins++;
+            break;
+        default:
+            break;
+    }
+
+    printf("Placar atualizado: Cliente %d x %d Servidor", msg.client_wins, msg.server_wins);
+}
+
+void sendGameResults() {
+    msg.type = MSG_RESULT;
+    send(csock, &msg, sizeof(msg), 0);
+}
+
+void sendPlayAgainRequest() {
+    msg.type = MSG_PLAY_AGAIN_REQUEST;
+    strcpy(msg.message,
+        "Deseja jogar novamente?\n"
+        "1 - Sim\n"
+        "0 - Não\n"
+    );
+    send(csock, &msg, sizeof(msg), 0);
+    printf("Perguntando se o cliente deseja jogar novamente.");
+}
+
+void recievePlayAgainResponse() {
+    recv(csock, &msg, sizeof(msg), 0); // Recebe a resposta do cliente
+    if (msg.type == MSG_PLAY_AGAIN_RESPONSE) {
+        // OK
+    } else {
+        // Erro ou protocolo quebrado
+        logexit("Tipo de mensagem inesperado");
+    }
+}
+
+void sendFinalResults() {
+    msg.type = MSG_END;
+    snprintf(msg.message, MSG_SIZE,
+         "Fim de Jogo!\n"
+         "Placar final: Você %d x %d Servidor\n"
+         "Obrigado por jogar!\n",
+         msg.client_wins, msg.server_wins);
+    send(csock, &msg, sizeof(msg), 0);
+    printf("Enviando placar final.");
+}
 
 void usage(int argc, char **argv) {
     printf("usage: %s <v4|v6> <server port>\n", argv[0]);
@@ -58,71 +158,54 @@ int main(int argc, char **argv) {
         printf("Servidor iniciado em modo IPv6 na porta %s. Aguardando conexão...\n", argv[2]);
     }
 
-    while (1) {
-        struct sockaddr_storage cstorage;
-        struct sockaddr *caddr = (struct sockaddr *)(&cstorage);
-        socklen_t caddrlen = sizeof(cstorage);
+    while (1) { // Trocar por --> while msg.type != MSG_END
+        
+        if(startNewConection == 1) {
+            struct sockaddr_storage cstorage;
+            struct sockaddr *caddr = (struct sockaddr *)(&cstorage);
+            socklen_t caddrlen = sizeof(cstorage);
 
-        int csock = accept(s, caddr, &caddrlen);
-        if (csock == -1) {
-            logexit("accept");
+            csock = accept(s, caddr, &caddrlen);
+            if (csock == -1) {
+                logexit("accept");
+            }
+            printf("Cliente conectado.\n");
+            startNewConection = 0;
         }
-        printf("Cliente conectado.\n");
 
-        msg.type = MSG_REQUEST;
-        strcpy(msg.message,
-            "Escolha sua jogada:\n"
-            "0 - Nuclear Attack\n"
-            "1 - Intercept Attack\n"
-            "2 - Cyber Attack\n"
-            "3 - Drone Strike\n"
-            "4 - Bio Attack\n"
-        );
-        send(csock, &msg, sizeof(msg), 0);
-        printf("Apresentando as opções para o cliente.");
+        sendRequestMsg(); // Envia requisição pro user jogar
 
-        /* Receber escolha do cliente */
-        recv(csock, &msg, sizeof(msg), 0);
-        if (msg.type != MSG_RESPONSE) {
-            // Erro ou protocolo quebrado
-            logexit("Tipo de mensagem inesperado");
+        recieveClientMsgResponse(); // Recebe a jogada do user
+
+        makeServerPlay(); // Fazer jogada
+
+        sendGameResults(); // Enviar resultado pro cliente
+
+        sendPlayAgainRequest();
+
+        recievePlayAgainResponse();
+        printReplayChoice(msg.client_action);
+
+        switch (msg.client_action) {
+            case 1:
+                /* Jogar novamente */
+                break;
+            case 0:
+                /* Sair do jogo e encerrar conexão */
+                startNewConection = 1;
+                sendFinalResults();
+                printf("Encerrando conexão.");
+                close(csock);
+                printf("Cliente desconectado.");
+                // Encerrar conexão
+                break;
+            default:
+                msg.type = MSG_ERROR;
+                strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.");
+                send(csock, &msg, sizeof(msg), 0);
+                printf("Erro: resposta inválida para jogar novamente.");
+                sendPlayAgainRequest();
+                break;
         }
-        /* Printar escolha do cliente "Cliente escolheu X." */
-
-        /* Escolha aleatória do servidor */
-        /* Printar a escolha aleatória do servidor */
-
-        /* Chamar regras do jogo pra decidir vencedor */
-        /* Atualizar placar e printar na tela o placar --> "Placar atualizado: Cliente A x B Servidor "*/
-
-        /* Enviar pro cliente a escolha do servidor e o resultado da jogada */
-
-        /* Enviar pro cliente a mesnagem pra jogar novamente */
-        msg.type = MSG_PLAY_AGAIN_REQUEST;
-        strcpy(msg.message,
-            "Deseja jogar novamente?\n"
-            "1 - Sim\n"
-            "0 - Não\n"
-        );
-
-        send(csock, &msg, sizeof(msg), 0);
-
-        char caddrstr[BUFSZ];
-        addrtostr(caddr, caddrstr, BUFSZ);
-        printf("[log] connection from %s\n", caddrstr);
-
-        char buf[BUFSZ];
-        memset(buf, 0, BUFSZ);
-        size_t count = recv(csock, buf, BUFSZ - 1, 0);
-        printf("[msg] %s, %d bytes: %s\n", caddrstr, (int)count, buf);
-
-        sprintf(buf, "remote endpoint: %.1000s\n", caddrstr);
-        count = send(csock, buf, strlen(buf) + 1, 0);
-        if (count != strlen(buf) + 1) {
-            logexit("send");
-        }
-        close(csock);
     }
-
-    exit(EXIT_SUCCESS);
 }

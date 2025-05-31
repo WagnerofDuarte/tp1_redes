@@ -10,6 +10,78 @@
 #include <arpa/inet.h>
 
 GameMessage msg;
+int s;
+
+const char* getMoveName(int move) {
+    switch (move) {
+        case 0:
+            return "Nuclear Attack";
+        case 1:
+            return "Intercept Attack";
+        case 2:
+            return "Cyber Attack";
+        case 3:
+            return "Drone Strike";
+        case 4:
+            return "Bio Attack";
+        default: // Tentar remover esse
+            return "Jogada inválida";
+    }
+}
+
+const char* getResultName(int move) {
+    switch (move) {
+        case 0:
+            return "Derrota";
+        case 1:
+            return "Vitória";
+        case -1: // Tentar remover esse
+            return "Empate";
+    }
+}
+
+void recieveRequestMsg() {
+	recv(s, &msg, sizeof(msg), 0);
+	if (msg.type == MSG_REQUEST) {
+		printf("%s", msg.message);
+	} else {
+		// MSG INVALIDA
+	}
+}
+
+void sendPlayChoseResponse() {
+	int usersChoice;
+	scanf("%d", &usersChoice);
+	msg.type = MSG_RESPONSE;
+	send(s, &msg, sizeof(msg), 0); 
+	printf("Você escolheu: %s", getMoveName(usersChoice));
+}
+
+void recieveGameResults() {
+	recv(s, &msg, sizeof(msg), 0);
+	if (msg.type == MSG_RESULT) {
+		printf("Servidor escolheu %s", getMoveName(msg.server_action));
+		printf("Resultado: %s!", getResultName(msg.result));
+	} else {
+		// MSG INVALIDA
+	}
+}
+
+void recievePlayAgainRequest() {
+	recv(s, &msg, sizeof(msg), 0);
+	if (msg.type == MSG_PLAY_AGAIN_REQUEST) {
+		printf("%s", msg.message);
+	} else {
+		// MSG INVALIDA
+	}
+}
+
+void sendPlayAgainResponse() {
+	int usersChoice;
+	scanf("%d", &usersChoice);
+	msg.type = MSG_PLAY_AGAIN_RESPONSE;
+	send(s, &msg, sizeof(msg), 0);
+}
 
 void usage(int argc, char **argv) {
 	printf("usage: %s <server IP> <server port>\n", argv[0]);
@@ -29,7 +101,6 @@ int main(int argc, char **argv) {
 		usage(argc, argv);
 	}
 
-	int s;
 	s = socket(storage.ss_family, SOCK_STREAM, 0);
 	if (s == -1) {
 		logexit("socket");
@@ -44,26 +115,20 @@ int main(int argc, char **argv) {
 	// addrtostr(addr, addrstr, BUFSZ);
 
 	// TODO: Criar função que lida com todos os tipos de mensagem
-	/* Recebe a mensagem de escolher a jogada e mostra na tela */
-	recv(s, &msg, sizeof(msg), 0);
-	if (msg.type == MSG_REQUEST) {
-		printf("%s", msg.message);
-	}
 
-	/* Cliente deve escolher um ataque*/
-	int usersChoice;
-	scanf("%d", &usersChoice);
-	/* Printar o ataque escolhido */
-	// Criar função que printa isso
+	recieveRequestMsg(); // Recebe a mensagem de escolher a jogada e mostra na tela
 
-	/* Enviar pro servidor a escolha */
-	send(s, &msg, sizeof(msg), 0);
+	sendPlayChoseResponse(); // Lê e envia para o server a escolha do user
 
-	/* Receber escolha do servidor + resultado da partida */
-	recv(s, &msg, sizeof(msg), 0);
-	/* Printar escolha do server e resultado da partida */
+	recieveGameResults(); // Recebe, printa escolha servidor, printa resultado
 
-	
+	recievePlayAgainRequest();
+
+	sendPlayAgainResponse();
+
+
+
+
 
 	char buf[BUFSZ];
 	memset(buf, 0, BUFSZ);

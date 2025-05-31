@@ -27,6 +27,8 @@ typedef struct {
 
 int jokenBoomLogic(int userChoice, int serverChoice);
 
+void msgTypeInterpreter(GameMessage msg);
+
 void logexit(const char *msg);
 
 int addrparse(const char *addrstr, const char *portstr,

@@ -1,3 +1,5 @@
+#include "common.h"
+
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,5 +135,24 @@ int jokenBoomLogic(int userChoice, int serverChoice) {
             return 0;
         default:
             break;
+    }
+}
+
+void msgTypeInterpreter(GameMessage msg){
+    switch (msg.type) {
+    case MSG_REQUEST:
+        return;
+    case MSG_RESPONSE:
+        return;
+    case MSG_RESULT:
+        return;
+    case MSG_PLAY_AGAIN_REQUEST:
+        return;
+    case MSG_PLAY_AGAIN_RESPONSE:
+        return;
+    case MSG_ERROR:
+        return;
+    case MSG_END:
+        return;
     }
 }
