@@ -26,6 +26,7 @@ const char* getResultName(int result);
 GameMessage msg;
 int csock;
 int startNewConection = 1;
+int errorFlag = 0;
 
 void recieveMsgAsServer() {
     MessageType nextMsgType = MSG_ERROR;
@@ -103,7 +104,11 @@ void sendMsgAsServer(MessageType type) {
     if(type == MSG_REQUEST || type == MSG_PLAY_AGAIN_REQUEST) {
         recieveMsgAsServer();
     } else if (type == MSG_ERROR) {
-        sendMsgAsServer(MSG_REQUEST);
+        if(errorFlag){
+            sendMsgAsServer(MSG_REQUEST);
+        } else {
+            sendMsgAsServer(MSG_PLAY_AGAIN_REQUEST);
+        }
     } else if (type == MSG_END) {
         endGame();
     }
@@ -149,6 +154,7 @@ int checkForErrors() {
             if (msg.client_action < 0 || msg.client_action > 4) {
                 printf("Erro: opção inválida de jogada.\n");
                 strcpy(msg.message, "Por favor, selecione um valor de 0 a 4.\n");
+                errorFlag = 0;
                 return 1;
             }
             return 0;
@@ -156,6 +162,7 @@ int checkForErrors() {
             if (msg.client_action < 0 || msg.client_action > 1) {
                 printf("Erro: resposta inválida para jogar novamente.\n");
                 strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.\n");
+                errorFlag = 1;
                 return 1;
             }
             return 0;
