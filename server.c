@@ -105,9 +105,9 @@ void sendMsgAsServer(MessageType type) {
         recieveMsgAsServer();
     } else if (type == MSG_ERROR) {
         if(errorFlag){
-            sendMsgAsServer(MSG_REQUEST);
-        } else {
             sendMsgAsServer(MSG_PLAY_AGAIN_REQUEST);
+        } else {
+            sendMsgAsServer(MSG_REQUEST);
         }
     } else if (type == MSG_END) {
         endGame();
