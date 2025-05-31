@@ -16,9 +16,9 @@ void recieveMsgAsServer() {
         }
         int matchResult = jokenBoomMatchResult();
         sendMsgAsServer(MSG_RESULT);
-        if(matchResult != -1) { // Nao empatou
+        if(matchResult != -1) { 
             nextMsgType = MSG_PLAY_AGAIN_REQUEST;
-        } else { // Empatou
+        } else {
             nextMsgType = MSG_REQUEST;
         }
     } else if (msg.type == MSG_PLAY_AGAIN_RESPONSE) {
@@ -93,15 +93,15 @@ void sendMsgAsServer(MessageType type) {
 
 void jokenBoomLogic() {
     if (msg.client_action == msg.server_action) {
-        msg.result = -1; // Empate
+        msg.result = -1;
     } else if ((msg.client_action == 0 && (msg.server_action == 2 || msg.server_action == 3)) ||
                (msg.client_action == 1 && (msg.server_action == 0 || msg.server_action == 4)) ||
                (msg.client_action == 2 && (msg.server_action == 1 || msg.server_action == 3)) ||
                (msg.client_action == 3 && (msg.server_action == 1 || msg.server_action == 4)) ||
                (msg.client_action == 4 && (msg.server_action == 0 || msg.server_action == 2))) {
-        msg.result = 1; // Cliente vence
+        msg.result = 1;
     } else {
-        msg.result = 0; // Servidor vence
+        msg.result = 0;
     }
 }
 
@@ -115,7 +115,7 @@ int jokenBoomMatchResult() {
     jokenBoomLogic();
     if (msg.result == 1) {
         msg.client_wins++;
-        printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins); // Tirar um dos prints
+        printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins);
     } else if (msg.result == 0) {
         msg.server_wins++;
         printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins);
@@ -178,7 +178,7 @@ const char* getMoveName(int move) {
             return "Drone Strike";
         case 4:
             return "Bio Attack";
-        default: // Tentar remover esse
+        default:
             return "Jogada inválida";
     }
 }
@@ -189,7 +189,7 @@ const char* getResultName(int move) {
             return "Derrota";
         case 1:
             return "Vitória";
-        case -1: // Tentar remover esse
+        case -1:
             return "Empate";
 		default:
 			return "Resultado inválido";
@@ -254,6 +254,6 @@ int main(int argc, char **argv) {
         }
         printf("Cliente conectado.\n");
 
-        sendMsgAsServer(MSG_REQUEST); // Envia requisição pro cliente jogar
+        sendMsgAsServer(MSG_REQUEST);
     }
 }
