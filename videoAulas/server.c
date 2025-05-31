@@ -55,7 +55,7 @@ void recieveClientMsgResponse() {
     }
 }
 
-void makeServerPlay() {
+int makeServerPlay() {
     srand(time(NULL)); // Inicializa a semente do gerador (só uma vez no programa)
     msg.server_action = rand() % 5;
     printf("Servidor escolheu aleatoriamente %d.\n", msg.server_action);
@@ -65,12 +65,13 @@ void makeServerPlay() {
     switch (result) {
         case 1:
             msg.client_wins++;
-            break;
+            return 1;
         case 0:
             msg.server_wins++;
-            break;
+            return 0;
         default:
-            break;
+            printf("Jogo empatado.\nSolicitando ao cliente mais uma escolha.\n");
+            return -1;
     }
 
     printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins);
@@ -173,16 +174,16 @@ int main(int argc, char **argv) {
             startNewConection = 0;
         }
 
-        sendRequestMsg(); // Envia requisição pro user jogar
+        int isTie = -1;
 
-        recieveClientMsgResponse(); // Recebe a jogada do user
-
-        makeServerPlay(); // Fazer jogada
-
-        sendGameResults(); // Enviar resultado pro cliente
+        while (isTie == -1) {
+            sendRequestMsg(); // Envia requisição pro user jogar
+            recieveClientMsgResponse(); // Recebe a jogada do user
+            isTie = makeServerPlay(); // Fazer jogada
+            sendGameResults(); // Enviar resultado pro cliente
+        }
 
         sendPlayAgainRequest();
-
         recievePlayAgainResponse();
         printReplayChoice(msg.client_action);
 

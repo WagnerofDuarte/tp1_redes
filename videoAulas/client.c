@@ -61,13 +61,15 @@ void sendPlayChoseResponse() {
 	printf("Você escolheu: %s\n", getMoveName(usersChoice));
 }
 
-void recieveGameResults() {
+int recieveGameResults() {
 	recv(s, &msg, sizeof(msg), 0);
 	if (msg.type == MSG_RESULT) {
 		printf("Servidor escolheu: %s\n", getMoveName(msg.server_action));
 		printf("Resultado: %s!\n", getResultName(msg.result));
+		return msg.result;
 	} else {
 		// MSG INVALIDA
+		return -2;
 	}
 }
 
@@ -133,11 +135,13 @@ int main(int argc, char **argv) {
 
 	while (playLoop) {
 
-		recieveRequestMsg(); // Recebe a mensagem de escolher a jogada e mostra na tela
+		int isTie = -1;
 
-		sendPlayChoseResponse(); // Lê e envia para o server a escolha do user
-
-		recieveGameResults(); // Recebe, printa escolha servidor, printa resultado
+		while(isTie == -1){
+			recieveRequestMsg(); // Recebe a mensagem de escolher a jogada e mostra na tela
+			sendPlayChoseResponse(); // Lê e envia para o server a escolha do user
+			isTie = recieveGameResults(); // Recebe, printa escolha servidor, printa resultado
+		}
 
 		recievePlayAgainRequest();
 
