@@ -1,5 +1,5 @@
-#include "common.h"
-
+#include "server.h"
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +22,7 @@ const char* getMoveName(int move);
 const char* getResultName(int result);
 
 #define BUFSZ 1024
-
+*/
 GameMessage msg;
 int csock;
 int startNewConection = 1;
@@ -218,125 +218,7 @@ const char* getResultName(int move) {
 			return "Resultado inválido";
     }
 }
-/*
-void printReplayChoice(int choice) {
-    switch (choice) {
-        case 0:
-            printf("Cliente não deseja jogar novamente.\n");
-            break;
-        case 1: 
-            printf("Cliente deseja jogar novamente.\n");
-            break;
-        default:
-            // ERRO
-            break;
-    }
-}
 
-void sendRequestMsg() {
-    msg.type = MSG_REQUEST;
-    strcpy(msg.message,
-        "Escolha sua jogada:\n"
-        "0 - Nuclear Attack\n"
-        "1 - Intercept Attack\n"
-        "2 - Cyber Attack\n"
-        "3 - Drone Strike\n"
-        "4 - Bio Attack\n"
-    );
-
-    send(csock, &msg, sizeof(msg), 0);
-    printf("Apresentando as opções para o cliente.\n");
-}
-
-void recieveClientMsgResponse() {
-    recv(csock, &msg, sizeof(msg), 0); // Recebe a jogada do cliente
-    printf("Cliente escolheu %d\n", msg.client_action);
-}
-
-int makeServerPlay1() {
-    msg.server_action = rand() % 5;
-    printf("Servidor escolheu aleatoriamente %d.\n", msg.server_action);
-}
-
-int jokenBoomMatchResult() {
-    makeServerPlay1();
-    msg.result = jokenBoomLogic(msg.client_action, msg.server_action);
-    if (msg.result == 1) {
-        msg.client_wins++;
-        printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins); // Tirar um dos prints
-    } else if (msg.result == 0) {
-        msg.server_wins++;
-        printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins);
-    } else {
-        printf("Jogo empatado.\nSolicitando ao cliente mais uma escolha.\n");
-    }
-    return msg.result;
-}
-
-int makeServerPlay() {
-    msg.server_action = rand() % 5;
-    printf("Servidor escolheu aleatoriamente %d.\n", msg.server_action);
-
-    int result = jokenBoomLogic(msg.client_action, msg.server_action);
-    msg.result = result;
-    switch (result) {
-        case 1:
-            msg.client_wins++;
-            break;
-        case 0:
-            msg.server_wins++;
-            break;
-        default:
-            printf("Jogo empatado.\nSolicitando ao cliente mais uma escolha.\n");
-            break;
-    }
-    printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins);
-    return result;
-}
-
-void sendGameResults() {
-    msg.type = MSG_RESULT;
-    snprintf(msg.message, MSG_SIZE,
-         "Você escolheu: %s\n"
-         "Servidor escolheu: %s\n"
-         "Resultado: %s!\n",
-         msg.client_action, msg.server_action, msg.result);
-    send(csock, &msg, sizeof(msg), 0);
-}
-
-void sendPlayAgainRequest() {
-    msg.type = MSG_PLAY_AGAIN_REQUEST;
-    strcpy(msg.message,
-        "Deseja jogar novamente?\n"
-        "1 - Sim\n"
-        "0 - Não\n"
-    );
-    send(csock, &msg, sizeof(msg), 0);
-    printf("Perguntando se o cliente deseja jogar novamente.\n");
-}
-
-void recievePlayAgainResponse() {
-    recv(csock, &msg, sizeof(msg), 0); // Recebe a resposta do cliente
-    if (msg.type == MSG_PLAY_AGAIN_RESPONSE) {
-        // OK
-    } else {
-        // Erro ou protocolo quebrado
-        logexit("Tipo de mensagem inesperado");
-    }
-}
-
-void sendFinalResults() {
-    msg.type = MSG_END;
-    snprintf(msg.message, MSG_SIZE,
-         "Fim de Jogo!\n"
-         "Placar final: Você %d x %d Servidor\n"
-         "Obrigado por jogar!\n",
-         msg.client_wins, msg.server_wins);
-    send(csock, &msg, sizeof(msg), 0);
-    printf("Enviando placar final.\n");
-}
-
-*/
 void usage(int argc, char **argv) {
     printf("usage: %s <v4|v6> <server port>\n", argv[0]);
     printf("example: %s v4 51511\n", argv[0]);
@@ -396,60 +278,5 @@ int main(int argc, char **argv) {
         printf("Cliente conectado.\n");
 
         sendMsgAsServer(MSG_REQUEST); // Envia requisição pro cliente jogar
-
-        /*
-
-        if(startNewConection){
-            struct sockaddr_storage cstorage;
-            struct sockaddr *caddr = (struct sockaddr *)(&cstorage);
-            socklen_t caddrlen = sizeof(cstorage);
-
-            csock = accept(s, caddr, &caddrlen);
-            if (csock == -1) {
-                logexit("accept");
-            }
-            printf("Cliente conectado.\n");
-            startNewConection = 0;
-        }
-
-        int isTie = -1;
-
-        while (isTie == -1) {
-            sendRequestMsg(); // Envia requisição pro user jogar
-            recieveClientMsgResponse(); // Recebe a jogada do user
-            while(checkForErrors()) {
-                sendErrorMsg();
-                sendRequestMsg(); // Envia requisição pro user jogar
-                recieveClientMsgResponse(); // Recebe a jogada do user
-            }
-            isTie = makeServerPlay(); // Fazer jogada
-            sendGameResults(); // Enviar resultado pro cliente
-        }
-
-        sendPlayAgainRequest();
-        recievePlayAgainResponse();
-        printReplayChoice(msg.client_action);
-
-        switch (msg.client_action) {
-            case 1:
-                // Jogar novamente
-                break;
-            case 0:
-                // Sair do jogo e encerrar conexão
-                startNewConection = 1;
-                sendFinalResults();
-                printf("Encerrando conexão.\n");
-                close(csock);
-                printf("Cliente desconectado.\n");
-                // Encerrar conexão
-                break;
-            default:
-                msg.type = MSG_ERROR;
-                strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.\n");
-                send(csock, &msg, sizeof(msg), 0);
-                printf("Erro: resposta inválida para jogar novamente.\n");
-                sendPlayAgainRequest();
-                break;
-        }*/
     }
 }
