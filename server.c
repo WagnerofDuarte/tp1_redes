@@ -16,7 +16,6 @@ int jokenBoomMatchResult();
 void makeServerPlay();
 void jokenBoomLogic();
 int checkForErrors();
-void defineErrorMsg();
 void endGame();
 void resetMsg();
 const char* getMoveName(int move);
@@ -31,26 +30,30 @@ int startNewConection = 1;
 void recieveMsgAsServer() {
     MessageType nextMsgType = MSG_ERROR;
     recv(csock, &msg, sizeof(msg), 0);
-    if(checkForErrors()) {
-        defineErrorMsg();
-    } else {
-        if(msg.type == MSG_RESPONSE) {
-            printf("Cliente escolheu %d\n", msg.client_action);
-            int matchResult = jokenBoomMatchResult();
-            sendMsgAsServer(MSG_RESULT);
-            if(matchResult != -1) { // Nao empatou
-                nextMsgType = MSG_PLAY_AGAIN_REQUEST;
-            } else { // Empatou
-                nextMsgType = MSG_REQUEST;
-            }
-        } else if (msg.type == MSG_PLAY_AGAIN_RESPONSE) {
-            if (msg.client_action) {
-                nextMsgType = MSG_REQUEST;
-                printf("Cliente deseja jogar novamente.\n");
-            } else {
-                nextMsgType = MSG_END;
-                printf("Cliente não deseja jogar novamente.\n");
-            }
+    if(msg.type == MSG_RESPONSE) {
+        printf("Cliente escolheu %d\n", msg.client_action);
+        if(checkForErrors()) {
+            sendMsgAsServer(nextMsgType);
+            return;
+        }
+        int matchResult = jokenBoomMatchResult();
+        sendMsgAsServer(MSG_RESULT);
+        if(matchResult != -1) { // Nao empatou
+            nextMsgType = MSG_PLAY_AGAIN_REQUEST;
+        } else { // Empatou
+            nextMsgType = MSG_REQUEST;
+        }
+    } else if (msg.type == MSG_PLAY_AGAIN_RESPONSE) {
+        if(checkForErrors()) {
+            sendMsgAsServer(nextMsgType);
+            return;
+        }
+        if (msg.client_action) {
+            nextMsgType = MSG_REQUEST;
+            printf("Cliente deseja jogar novamente.\n");
+        } else {
+            nextMsgType = MSG_END;
+            printf("Cliente não deseja jogar novamente.\n");
         }
     }
     sendMsgAsServer(nextMsgType);
@@ -138,30 +141,19 @@ int jokenBoomMatchResult() {
     return msg.result;
 }
 
-void defineErrorMsg() {
-    switch (msg.type) {
-        case MSG_RESPONSE:
-            printf("Erro: opção inválida de jogada.\n");
-            strcpy(msg.message, "Por favor, selecione um valor de 0 a 4.\n");
-            break;
-        case MSG_PLAY_AGAIN_RESPONSE:
-            printf("Erro: resposta inválida para jogar novamente.\n");
-            strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.\n");
-            break;
-        default:
-            break;
-    }
-}
-
 int checkForErrors() {
     switch (msg.type) {
         case MSG_RESPONSE:
             if (msg.client_action < 0 || msg.client_action > 4) {
+                printf("Erro: opção inválida de jogada.\n");
+                strcpy(msg.message, "Por favor, selecione um valor de 0 a 4.\n");
                 return 1;
             }
             return 0;
         case MSG_PLAY_AGAIN_RESPONSE:
             if (msg.client_action < 0 || msg.client_action > 1) {
+                printf("Erro: resposta inválida para jogar novamente.\n");
+                strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.\n");
                 return 1;
             }
             return 0;
