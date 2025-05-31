@@ -158,9 +158,9 @@ int main(int argc, char **argv) {
         printf("Servidor iniciado em modo IPv6 na porta %s. Aguardando conexão...\n", argv[2]);
     }
 
-    while (1) { // Trocar por --> while msg.type != MSG_END
+    while (1) {
         
-        if(startNewConection == 1) {
+        if(startNewConection) {
             struct sockaddr_storage cstorage;
             struct sockaddr *caddr = (struct sockaddr *)(&cstorage);
             socklen_t caddrlen = sizeof(cstorage);

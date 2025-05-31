@@ -11,6 +11,7 @@
 
 GameMessage msg;
 int s;
+int playLoop = 1;
 
 const char* getMoveName(int move) {
     switch (move) {
@@ -52,6 +53,7 @@ void recieveRequestMsg() {
 void sendPlayChoseResponse() {
 	int usersChoice;
 	scanf("%d", &usersChoice);
+
 	msg.type = MSG_RESPONSE;
 	send(s, &msg, sizeof(msg), 0); 
 	printf("Você escolheu: %s", getMoveName(usersChoice));
@@ -76,11 +78,21 @@ void recievePlayAgainRequest() {
 	}
 }
 
-void sendPlayAgainResponse() {
+int sendPlayAgainResponse() {
 	int usersChoice;
 	scanf("%d", &usersChoice);
 	msg.type = MSG_PLAY_AGAIN_RESPONSE;
 	send(s, &msg, sizeof(msg), 0);
+	return usersChoice; 
+}
+
+void recieveFinalResults() {
+	recv(s, &msg, sizeof(msg), 0);
+	if (msg.type == MSG_END) {
+		printf("%s", msg.message);
+	} else {
+		// MSG INVALIDA
+	}
 }
 
 void usage(int argc, char **argv) {
@@ -116,30 +128,39 @@ int main(int argc, char **argv) {
 
 	// TODO: Criar função que lida com todos os tipos de mensagem
 
-	recieveRequestMsg(); // Recebe a mensagem de escolher a jogada e mostra na tela
+	while (playLoop) {
 
-	sendPlayChoseResponse(); // Lê e envia para o server a escolha do user
+		recieveRequestMsg(); // Recebe a mensagem de escolher a jogada e mostra na tela
 
-	recieveGameResults(); // Recebe, printa escolha servidor, printa resultado
+		sendPlayChoseResponse(); // Lê e envia para o server a escolha do user
 
-	recievePlayAgainRequest();
+		recieveGameResults(); // Recebe, printa escolha servidor, printa resultado
 
-	sendPlayAgainResponse();
+		recievePlayAgainRequest();
 
+		int startNewGame = sendPlayAgainResponse();
 
+		if(startNewGame == 0) {
+			recieveFinalResults();
+			playLoop = 0;
+		} else {
+			// Tratar caso mensagem inválida
+		}
+	}
 
+	close(s);
+	exit(EXIT_SUCCESS);
 
-
-	char buf[BUFSZ];
+	/* char buf[BUFSZ];
 	memset(buf, 0, BUFSZ);
 	printf("mensagem> ");
 	fgets(buf, BUFSZ-1, stdin);
 	size_t count = send(s, buf, strlen(buf)+1, 0);
 	if (count != strlen(buf)+1) {
 		logexit("send");
-	}
+	}*/
 
-	memset(buf, 0, BUFSZ);
+	/* memset(buf, 0, BUFSZ);
 	unsigned total = 0;
 	while(1) {
 		count = recv(s, buf + total, BUFSZ - total, 0);
@@ -153,6 +174,8 @@ int main(int argc, char **argv) {
 
 	printf("received %u bytes\n", total);
 	puts(buf);
+	
 
 	exit(EXIT_SUCCESS);
+	*/
 }
