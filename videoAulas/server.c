@@ -19,10 +19,10 @@ int startNewConection = 1;
 void printReplayChoice(int choice) {
     switch (choice) {
         case 0:
-            printf("Cliente não deseja jogar novamente.");
+            printf("Cliente não deseja jogar novamente.\n");
             break;
         case 1: 
-            printf("Cliente deseja jogar novamente.");
+            printf("Cliente deseja jogar novamente.\n");
             break;
         default:
             // ERRO
@@ -42,23 +42,23 @@ void sendRequestMsg() {
     );
 
     send(csock, &msg, sizeof(msg), 0);
-    printf("Apresentando as opções para o cliente.");
+    printf("Apresentando as opções para o cliente.\n");
 }
 
 void recieveClientMsgResponse() {
     recv(csock, &msg, sizeof(msg), 0); // Recebe a jogada do cliente
     if (msg.type == MSG_RESPONSE) {
-        printf("Cliente escolheu %d", msg.client_action);
+        printf("Cliente escolheu %d\n", msg.client_action);
     } else {
         // Erro ou protocolo quebrado
-        logexit("Tipo de mensagem inesperado");
+        logexit("Tipo de mensagem inesperado\n");
     }
 }
 
 void makeServerPlay() {
     srand(time(NULL)); // Inicializa a semente do gerador (só uma vez no programa)
     msg.server_action = rand() % 5;
-    printf("Servidor escolheu aleatoriamente %d.", msg.server_action);
+    printf("Servidor escolheu aleatoriamente %d.\n", msg.server_action);
 
     int result = jokenBoomLogic(msg.client_action, msg.server_action);
     msg.result = result;
@@ -73,7 +73,7 @@ void makeServerPlay() {
             break;
     }
 
-    printf("Placar atualizado: Cliente %d x %d Servidor", msg.client_wins, msg.server_wins);
+    printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins);
 }
 
 void sendGameResults() {
@@ -89,7 +89,7 @@ void sendPlayAgainRequest() {
         "0 - Não\n"
     );
     send(csock, &msg, sizeof(msg), 0);
-    printf("Perguntando se o cliente deseja jogar novamente.");
+    printf("Perguntando se o cliente deseja jogar novamente.\n");
 }
 
 void recievePlayAgainResponse() {
@@ -110,7 +110,7 @@ void sendFinalResults() {
          "Obrigado por jogar!\n",
          msg.client_wins, msg.server_wins);
     send(csock, &msg, sizeof(msg), 0);
-    printf("Enviando placar final.");
+    printf("Enviando placar final.\n");
 }
 
 void usage(int argc, char **argv) {
@@ -194,16 +194,16 @@ int main(int argc, char **argv) {
                 /* Sair do jogo e encerrar conexão */
                 startNewConection = 1;
                 sendFinalResults();
-                printf("Encerrando conexão.");
+                printf("Encerrando conexão.\n");
                 close(csock);
-                printf("Cliente desconectado.");
+                printf("Cliente desconectado.\n");
                 // Encerrar conexão
                 break;
             default:
                 msg.type = MSG_ERROR;
-                strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.");
+                strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.\n");
                 send(csock, &msg, sizeof(msg), 0);
-                printf("Erro: resposta inválida para jogar novamente.");
+                printf("Erro: resposta inválida para jogar novamente.\n");
                 sendPlayAgainRequest();
                 break;
         }

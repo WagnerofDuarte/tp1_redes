@@ -46,7 +46,7 @@ const char* getResultName(int move) {
 void recieveRequestMsg() {
 	recv(s, &msg, sizeof(msg), 0);
 	if (msg.type == MSG_REQUEST) {
-		printf("%s", msg.message);
+		printf("%s\n", msg.message);
 	} else {
 		// MSG INVALIDA
 	}
@@ -58,14 +58,14 @@ void sendPlayChoseResponse() {
 
 	msg.type = MSG_RESPONSE;
 	send(s, &msg, sizeof(msg), 0); 
-	printf("Você escolheu: %s", getMoveName(usersChoice));
+	printf("Você escolheu: %s\n", getMoveName(usersChoice));
 }
 
 void recieveGameResults() {
 	recv(s, &msg, sizeof(msg), 0);
 	if (msg.type == MSG_RESULT) {
-		printf("Servidor escolheu %s", getMoveName(msg.server_action));
-		printf("Resultado: %s!", getResultName(msg.result));
+		printf("Servidor escolheu %s\n", getMoveName(msg.server_action));
+		printf("Resultado: %s!\n", getResultName(msg.result));
 	} else {
 		// MSG INVALIDA
 	}
@@ -74,7 +74,7 @@ void recieveGameResults() {
 void recievePlayAgainRequest() {
 	recv(s, &msg, sizeof(msg), 0);
 	if (msg.type == MSG_PLAY_AGAIN_REQUEST) {
-		printf("%s", msg.message);
+		printf("%s\n", msg.message);
 	} else {
 		// MSG INVALIDA
 	}
@@ -91,7 +91,7 @@ int sendPlayAgainResponse() {
 void recieveFinalResults() {
 	recv(s, &msg, sizeof(msg), 0);
 	if (msg.type == MSG_END) {
-		printf("%s", msg.message);
+		printf("%s\n", msg.message);
 	} else {
 		// MSG INVALIDA
 	}
