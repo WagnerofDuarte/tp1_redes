@@ -10,6 +10,18 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+void sendMsgAsServer(MessageType type);
+void recieveMsgAsServer();
+int jokenBoomMatchResult();
+void makeServerPlay();
+void jokenBoomLogic();
+int checkForErrors();
+void defineErrorMsg();
+void endGame();
+void resetMsg();
+const char* getMoveName(int move);
+const char* getResultName(int result);
+
 #define BUFSZ 1024
 
 GameMessage msg;
@@ -17,11 +29,10 @@ int csock;
 int startNewConection = 1;
 
 void recieveMsgAsServer() {
-    MessageType nextMsgType;
+    MessageType nextMsgType = MSG_ERROR;
     recv(csock, &msg, sizeof(msg), 0);
     if(checkForErrors()) {
         defineErrorMsg();
-        nextMsgType = MSG_ERROR;
     } else {
         if(msg.type == MSG_RESPONSE) {
             printf("Cliente escolheu %d\n", msg.client_action);
@@ -64,7 +75,7 @@ void sendMsgAsServer(MessageType type) {
                 "Você escolheu: %s\n"
                 "Servidor escolheu: %s\n"
                 "Resultado: %s!\n",
-                msg.client_action, msg.server_action, msg.result);
+                getMoveName(msg.client_action), getMoveName(msg.server_action), getResultName(msg.result));
 			break;
 		case MSG_PLAY_AGAIN_REQUEST:
 			strcpy(msg.message,
@@ -107,14 +118,14 @@ void jokenBoomLogic() {
     }
 }
 
-int makeServerPlay() {
+void makeServerPlay() {
     msg.server_action = rand() % 5;
     printf("Servidor escolheu aleatoriamente %d.\n", msg.server_action);
 }
 
 int jokenBoomMatchResult() {
     makeServerPlay();
-    jokenBoomLogic(msg.client_action, msg.server_action);
+    jokenBoomLogic();
     if (msg.result == 1) {
         msg.client_wins++;
         printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins); // Tirar um dos prints
@@ -175,6 +186,36 @@ void endGame() {
     printf("Cliente desconectado.\n");
     resetMsg();
     startNewConection = 1;
+}
+
+const char* getMoveName(int move) {
+    switch (move) {
+        case 0:
+            return "Nuclear Attack";
+        case 1:
+            return "Intercept Attack";
+        case 2:
+            return "Cyber Attack";
+        case 3:
+            return "Drone Strike";
+        case 4:
+            return "Bio Attack";
+        default: // Tentar remover esse
+            return "Jogada inválida";
+    }
+}
+
+const char* getResultName(int move) {
+    switch (move) {
+        case 0:
+            return "Derrota";
+        case 1:
+            return "Vitória";
+        case -1: // Tentar remover esse
+            return "Empate";
+		default:
+			return "Resultado inválido";
+    }
 }
 /*
 void printReplayChoice(int choice) {
@@ -390,10 +431,10 @@ int main(int argc, char **argv) {
 
         switch (msg.client_action) {
             case 1:
-                /* Jogar novamente
+                // Jogar novamente
                 break;
             case 0:
-                /* Sair do jogo e encerrar conexão
+                // Sair do jogo e encerrar conexão
                 startNewConection = 1;
                 sendFinalResults();
                 printf("Encerrando conexão.\n");

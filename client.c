@@ -9,6 +9,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+void sendMsgAsClient(MessageType type);
+void recieveMsgAsClient();
+
 GameMessage msg;
 int s;
 //int playLoop = 1;
