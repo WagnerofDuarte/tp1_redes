@@ -68,11 +68,11 @@ void sendMsgAsServer(MessageType type) {
 			break;
 		case MSG_END:
 			snprintf(msg.message, MSG_SIZE,
-                "Fim de Jogo!\n"
+                "\nFim de Jogo!\n"
                 "Placar final: Você %d x %d Servidor\n"
                 "Obrigado por jogar!\n",
                 msg.client_wins, msg.server_wins);
-            printf("Enviando placar final.\n");
+            printf("\nEnviando placar final.\n");
 			break;
 		default:
 			break;
@@ -130,7 +130,7 @@ int checkForErrors() {
         case MSG_RESPONSE:
             if (msg.client_action < 0 || msg.client_action > 4) {
                 printf("\nErro: opção inválida de jogada.\n");
-                strcpy(msg.message, "Por favor, selecione um valor de 0 a 4.\n");
+                strcpy(msg.message, "\nPor favor, selecione um valor de 0 a 4.");
                 errorFlag = 0;
                 return 1;
             }
@@ -138,7 +138,7 @@ int checkForErrors() {
         case MSG_PLAY_AGAIN_RESPONSE:
             if (msg.client_action < 0 || msg.client_action > 1) {
                 printf("\nErro: resposta inválida para jogar novamente.\n");
-                strcpy(msg.message, "Por favor, digite 1 para jogar novamente ou 0 para encerrar.\n");
+                strcpy(msg.message, "\nPor favor, digite 1 para jogar novamente ou 0 para encerrar.");
                 errorFlag = 1;
                 return 1;
             }
