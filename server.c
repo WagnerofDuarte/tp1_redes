@@ -75,16 +75,16 @@ int makeServerPlay() {
     switch (result) {
         case 1:
             msg.client_wins++;
-            return 1;
+            break;
         case 0:
             msg.server_wins++;
-            return 0;
+            break;
         default:
             printf("Jogo empatado.\nSolicitando ao cliente mais uma escolha.\n");
-            return -1;
+            break;
     }
-
     printf("Placar atualizado: Cliente %d x %d Servidor\n", msg.client_wins, msg.server_wins);
+    return result;
 }
 
 void sendGameResults() {
