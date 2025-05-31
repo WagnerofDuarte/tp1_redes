@@ -17,7 +17,6 @@ int csock;
 int startNewConection = 1;
 
 void printReplayChoice(int choice) {
-    printf("Cliente escolheu 2: %d\n", choice);
     switch (choice) {
         case 0:
             printf("Cliente não deseja jogar novamente.\n");
@@ -97,7 +96,6 @@ void recievePlayAgainResponse() {
     recv(csock, &msg, sizeof(msg), 0); // Recebe a resposta do cliente
     if (msg.type == MSG_PLAY_AGAIN_RESPONSE) {
         // OK
-        printf("Cliente respondeu 1: %d\n", msg.client_action);
     } else {
         // Erro ou protocolo quebrado
         logexit("Tipo de mensagem inesperado");

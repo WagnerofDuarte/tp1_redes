@@ -64,7 +64,7 @@ void sendPlayChoseResponse() {
 void recieveGameResults() {
 	recv(s, &msg, sizeof(msg), 0);
 	if (msg.type == MSG_RESULT) {
-		printf("Servidor escolheu %s\n", getMoveName(msg.server_action));
+		printf("Servidor escolheu: %s\n", getMoveName(msg.server_action));
 		printf("Resultado: %s!\n", getResultName(msg.result));
 	} else {
 		// MSG INVALIDA
