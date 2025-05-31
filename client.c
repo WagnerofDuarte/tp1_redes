@@ -11,8 +11,51 @@
 
 GameMessage msg;
 int s;
-int playLoop = 1;
+//int playLoop = 1;
 
+void recieveMsgAsClient() {
+	recv(s, &msg, sizeof(msg), 0);
+	switch (msg.type) {
+		case MSG_REQUEST:
+			printf("%s\n", msg.message);
+			sendMsgAsClient(MSG_RESPONSE);
+			break;
+		case MSG_RESULT:
+			printf("%s\n", msg.message);
+			recieveMsgAsClient();
+			break;
+		case MSG_PLAY_AGAIN_REQUEST:
+			printf("%s\n", msg.message);
+			sendMsgAsClient(MSG_PLAY_AGAIN_RESPONSE);
+			break;
+		case MSG_ERROR:
+			printf("%s\n", msg.message);
+			recieveMsgAsClient();
+			break;
+		case MSG_END:
+			printf("%s\n", msg.message);
+			break;
+		default:
+			break;
+	}
+}
+
+void sendMsgAsClient(MessageType type) {
+	msg.type = type;
+	switch (type) {
+		case MSG_RESPONSE:
+			scanf("%d", &msg.client_action);
+			break;
+		case MSG_PLAY_AGAIN_RESPONSE:
+			scanf("%d", &msg.client_action);
+			break;
+		default:
+			break;
+	}
+	send(s, &msg, sizeof(msg), 0);
+	recieveMsgAsClient();
+}
+/*
 const char* getMoveName(int move) {
     switch (move) {
         case 0:
@@ -58,14 +101,12 @@ void sendPlayChoseResponse() {
 	msg.type = MSG_RESPONSE;
 	msg.client_action = usersChoice;
 	send(s, &msg, sizeof(msg), 0); 
-	printf("Você escolheu: %s\n", getMoveName(usersChoice));
 }
 
 int recieveGameResults() {
 	recv(s, &msg, sizeof(msg), 0);
 	if (msg.type == MSG_RESULT) {
-		printf("Servidor escolheu: %s\n", getMoveName(msg.server_action));
-		printf("Resultado: %s!\n", getResultName(msg.result));
+		printf("%s\n", msg.message);
 		return msg.result;
 	} else {
 		// MSG INVALIDA
@@ -99,14 +140,14 @@ void recieveFinalResults() {
 		// MSG INVALIDA
 	}
 }
-
+*/
 void usage(int argc, char **argv) {
 	printf("usage: %s <server IP> <server port>\n", argv[0]);
 	printf("example: %s 127.0.0.1 51511\n", argv[0]);
 	exit(EXIT_FAILURE);
 }
 
-#define BUFSZ 1024
+// #define BUFSZ 1024
 
 int main(int argc, char **argv) {
 	if (argc < 3) {
@@ -133,13 +174,14 @@ int main(int argc, char **argv) {
 
 	// TODO: Criar função que lida com todos os tipos de mensagem
 
-	while (playLoop) {
+	/*while (playLoop) {
 
 		int isTie = -1;
 
 		while(isTie == -1){
 			recieveRequestMsg(); // Recebe a mensagem de escolher a jogada e mostra na tela
 			sendPlayChoseResponse(); // Lê e envia para o server a escolha do user
+			recieveMsgAsClient();
 			isTie = recieveGameResults(); // Recebe, printa escolha servidor, printa resultado
 		}
 
@@ -153,8 +195,9 @@ int main(int argc, char **argv) {
 		} else {
 			// Tratar caso mensagem inválida
 		}
-	}
+	}*/
 
+	recieveMsgAsClient();
 	close(s);
 	exit(EXIT_SUCCESS);
 
